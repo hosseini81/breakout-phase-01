@@ -30,6 +30,7 @@ public final class GameConstants {
     public static final int BRICK_GAP = 6;
     public static final int BRICK_TOP_MARGIN = 60;
     public static final int BRICK_POINTS = 100;
+    public static final int BRICK_LEFT_MARGIN = 39;
 
     // Player configuration
     public static final int INITIAL_LIVES = 3;
