@@ -73,11 +73,35 @@ Contains the core game entities and state:
 
 ## Running the Project
 
-1. Make sure Java 11 is installed.
+### Requirements
+
+- Java Development Kit (JDK) 11
+- IntelliJ IDEA or another Java IDE
+- ACM Graphics Library (included in the `lib/` directory)
+
+### Setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone <repository-url>
+   ```
+
 2. Open the project in IntelliJ IDEA.
-3. Configure the project SDK to Java 11.
-4. Add the ACM library (`acm.jar`) to the project classpath.
+
+3. Set the Project SDK to Java 11.
+
+4. Add the ACM library to the project:
+
+    - Open `File → Project Structure → Modules`.
+    - Select the `Dependencies` tab.
+    - Click `+ → JARs or Directories`.
+    - Select `lib/acm.jar`.
+    - Set the dependency scope to `Compile`.
+    - Apply the changes.
+
 5. Run the `main` method in `breakout.AcmTest`.
+
 
 ## High Score
 
