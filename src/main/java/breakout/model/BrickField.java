@@ -47,4 +47,17 @@ public class BrickField {
 
         return count;
     }
+
+    public void reset() {
+
+        for (int row = 0; row < GameConstants.BRICK_ROWS; row++) {
+
+            for (int column = 0;
+                 column < GameConstants.BRICK_COLUMNS;
+                 column++) {
+
+                bricks[row][column] = new Brick(row, column);
+            }
+        }
+    }
 }

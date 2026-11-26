@@ -1,12 +1,10 @@
 package breakout;
 
-import acm.graphics.GOval;
 import breakout.model.Ball;
 
 import javax.swing.JFrame;
 
 import acm.program.GraphicsProgram;
-import acm.graphics.GRect;
 
 import breakout.config.GameConstants;
 import breakout.model.Paddle;
@@ -20,26 +18,29 @@ import breakout.model.BrickField;
 import breakout.storage.HighScoreStorage;
 import breakout.storage.InMemoryScoreStorage;
 
+import breakout.model.GameState;
+
+import acm.graphics.GCanvas;
+import breakout.view.BreakoutCanvas;
+
 public class AcmTest extends GraphicsProgram {
 
     private Paddle paddle;
-    private GRect paddleShape;
+
 
     private Ball ball;
-    private GOval ballShape;
-
-    private volatile boolean ballLaunched = false;
 
     private int lives = GameConstants.INITIAL_LIVES;
 
     private BrickField brickField;
-    private GRect[][] brickShapes;
 
     private int score = 0;
 
     private HighScoreStorage scoreStorage;
 
-    private boolean gameWon = false;
+    private volatile GameState gameState = GameState.READY;
+
+    private BreakoutCanvas breakoutCanvas;
 
     @Override
     public void run() {
@@ -52,81 +53,53 @@ public class AcmTest extends GraphicsProgram {
         scoreStorage = new InMemoryScoreStorage();
 
         brickField = new BrickField();
-
-        brickShapes = new GRect[
-                GameConstants.BRICK_ROWS
-                ][
-                GameConstants.BRICK_COLUMNS
-                ];
-
-        for (int row = 0; row < GameConstants.BRICK_ROWS; row++) {
-
-            for (int column = 0;
-                 column < GameConstants.BRICK_COLUMNS;
-                 column++) {
-
-                Brick brick = brickField.getBrick(row, column);
-
-                GRect shape = new GRect(
-                        brick.getX(),
-                        brick.getY(),
-                        brick.getWidth(),
-                        brick.getHeight()
-                );
-
-                shape.setFilled(true);
-                shape.setFillColor(Color.ORANGE);
-
-                add(shape);
-
-                brickShapes[row][column] = shape;
-            }
-        }
+        breakoutCanvas.drawBricks(brickField);
 
         paddle = new Paddle();
 
         ball = new Ball(paddle);
 
-        ballShape = new GOval(
-                ball.getX(),
-                ball.getY(),
-                ball.getRadius() * 2,
-                ball.getRadius() * 2
+        breakoutCanvas.drawBall(ball);
+        breakoutCanvas.drawPaddle(paddle);
+
+        breakoutCanvas.drawStatusBar();
+
+        breakoutCanvas.updateStatusBar(
+                score,
+                lives,
+                scoreStorage.loadHighScore()
         );
-
-        ballShape.setFilled(true);
-        ballShape.setFillColor(Color.RED);
-
-        add(ballShape);
-
-        paddleShape = new GRect(
-                paddle.getX(),
-                paddle.getY(),
-                paddle.getWidth(),
-                paddle.getHeight()
-        );
-
-        paddleShape.setFilled(true);
-        paddleShape.setFillColor(Color.BLUE);
-
-        add(paddleShape);
 
         addKeyListeners();
 
         while (true) {
 
-            if (ballLaunched) {
-                ball.move();
-                handleWallCollisions();
-                handleBrickCollisions();
-                handleVictory();
-                handlePaddleCollision();
-                handleBallLost();
-            } else {
+            if (gameState == GameState.READY) {
+
                 ball.followPaddle(paddle);
+
+            } else if (gameState == GameState.RUNNING) {
+
+                ball.move();
+
+                handleWallCollisions();
+
+                handleBrickCollisions();
+
+                handlePaddleCollision();
+
+                handleBallLost();
+
+                handleVictory();
             }
 
-            ballShape.setLocation(ball.getX(), ball.getY());
+            breakoutCanvas.updateBall(ball);
+
+            breakoutCanvas.updateStatusBar(
+                    score,
+                    lives,
+                    scoreStorage.loadHighScore()
+            );
 
             pause(GameConstants.FRAME_DELAY_MS);
         }
@@ -253,7 +226,7 @@ public class AcmTest extends GraphicsProgram {
 
                     score += brick.hit();
 
-                    remove(brickShapes[row][column]);
+                    breakoutCanvas.removeBrick(row, column);
 
                     System.out.println("Score: " + score);
 
@@ -269,22 +242,24 @@ public class AcmTest extends GraphicsProgram {
                 > GameConstants.WINDOW_HEIGHT) {
 
             lives--;
-            ballLaunched = false;
 
             if (lives > 0) {
+
                 ball.setVx(0.0);
                 ball.setVy(0.0);
 
                 ball.followPaddle(paddle);
 
+                gameState = GameState.READY;
+
             } else {
+
+                gameState = GameState.GAME_OVER;
 
                 scoreStorage.saveHighScore(score);
 
-                System.out.println("GAME OVER!");
-
-                System.out.println(
-                        "High Score: " + scoreStorage.loadHighScore()
+                breakoutCanvas.showMessage(
+                        "GAME OVER - Press R to Restart"
                 );
             }
         }
@@ -293,49 +268,106 @@ public class AcmTest extends GraphicsProgram {
 
     private void handleVictory() {
 
-        if (!gameWon && brickField.getRemainingBrickCount() == 0) {
+        if (gameState == GameState.RUNNING
+                && brickField.getRemainingBrickCount() == 0) {
 
-            gameWon = true;
-            ballLaunched = false;
+            gameState = GameState.VICTORY;
 
             ball.setVx(0.0);
             ball.setVy(0.0);
 
             scoreStorage.saveHighScore(score);
 
-            System.out.println("VICTORY!");
-
-            System.out.println(
-                    "Final Score: " + score
-            );
-
-            System.out.println(
-                    "High Score: " + scoreStorage.loadHighScore()
+            breakoutCanvas.showMessage(
+                    "VICTORY - Press R to Restart"
             );
         }
+    }
+
+
+    private void restartGame() {
+
+        // Return to READY state
+        gameState = GameState.READY;
+        breakoutCanvas.clearMessage();
+
+        // Remove existing brick shapes
+        breakoutCanvas.clearBricks();
+
+        // Reset paddle and ball
+        paddle.reset();
+        ball.reset(paddle);
+
+        // Reset bricks
+        brickField.reset();
+        breakoutCanvas.drawBricks(brickField);
+
+        // Reset player information
+        lives = GameConstants.INITIAL_LIVES;
+        score = 0;
+
+        // Update graphical objects
+        breakoutCanvas.updatePaddle(paddle);
+
+        breakoutCanvas.updateBall(ball);
     }
 
 
     @Override
     public void keyPressed(KeyEvent e) {
 
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            paddle.moveLeft();
-
-        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            paddle.moveRight();
-
-        } else if (e.getKeyCode() == KeyEvent.VK_SPACE
-                && !ballLaunched && lives > 0 && !gameWon) {
-
-            ball.launch();
-            ballLaunched = true;
+        // Restart game from any state
+        if (e.getKeyCode() == KeyEvent.VK_R) {
+            restartGame();
+            return;
         }
 
-        paddleShape.setLocation(
-                paddle.getX(),
-                paddle.getY()
-        );
+        if (gameState == GameState.READY
+                || gameState == GameState.RUNNING) {
+
+            if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                paddle.moveLeft();
+
+            } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                paddle.moveRight();
+
+            } else if (e.getKeyCode() == KeyEvent.VK_SPACE
+                    && gameState == GameState.READY
+                    && lives > 0) {
+
+                ball.launch();
+                gameState = GameState.RUNNING;
+            }
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_P) {
+
+            if (gameState == GameState.RUNNING) {
+
+                gameState = GameState.PAUSED;
+
+                breakoutCanvas.showMessage(
+                        "PAUSED - Press P to Resume"
+                );
+
+            } else if (gameState == GameState.PAUSED) {
+
+                gameState = GameState.RUNNING;
+
+                breakoutCanvas.clearMessage();
+            }
+        }
+
+        breakoutCanvas.updatePaddle(paddle);
+    }
+
+
+    @Override
+    protected GCanvas createGCanvas() {
+
+        breakoutCanvas = new BreakoutCanvas();
+
+        return breakoutCanvas;
     }
 
     @Override

@@ -105,5 +105,13 @@ public class Ball {
 
         vy = -Math.abs(speed * Math.cos(angle));
     }
+
+    public void reset(Paddle paddle) {
+
+        this.vx = 0.0;
+        this.vy = 0.0;
+
+        followPaddle(paddle);
+    }
 }
 

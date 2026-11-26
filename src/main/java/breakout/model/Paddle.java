@@ -29,6 +29,11 @@ public class Paddle {
         x = Math.min(maxX, x + GameConstants.PADDLE_SPEED);
     }
 
+    public void reset() {
+        x = (GameConstants.WINDOW_WIDTH
+                - GameConstants.PADDLE_WIDTH) / 2;
+    }
+
     // Getters
     public int getX() {
         return x;
