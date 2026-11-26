@@ -84,8 +84,7 @@ Contains the core game entities and state:
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
-   ```
+   git clone https://github.com/hosseini81/breakout-phase-01.git
 
 2. Open the project in IntelliJ IDEA.
 
