@@ -5,8 +5,6 @@ import acm.graphics.GCanvas;
 import acm.graphics.GRect;
 import breakout.model.Paddle;
 
-import java.awt.Color;
-
 import acm.graphics.GOval;
 import breakout.model.Ball;
 
@@ -44,7 +42,7 @@ public class BreakoutCanvas extends GCanvas {
         );
 
         paddleShape.setFilled(true);
-        paddleShape.setFillColor(Color.BLUE);
+        paddleShape.setFillColor(GameConstants.PADDLE_COLOR);
 
         add(paddleShape);
     }
@@ -67,7 +65,7 @@ public class BreakoutCanvas extends GCanvas {
         );
 
         ballShape.setFilled(true);
-        ballShape.setFillColor(Color.RED);
+        ballShape.setFillColor(GameConstants.BALL_COLOR);
 
         add(ballShape);
     }
@@ -81,6 +79,8 @@ public class BreakoutCanvas extends GCanvas {
     }
 
     public void drawBricks(BrickField brickField) {
+
+        clearBricks();
 
         brickShapes = new GRect[
                 GameConstants.BRICK_ROWS
@@ -104,7 +104,7 @@ public class BreakoutCanvas extends GCanvas {
                 );
 
                 shape.setFilled(true);
-                shape.setFillColor(Color.ORANGE);
+                shape.setFillColor(GameConstants.BRICK_COLOR);
 
                 add(shape);
 
@@ -152,7 +152,7 @@ public class BreakoutCanvas extends GCanvas {
         );
 
         statusBarShape.setFilled(true);
-        statusBarShape.setFillColor(Color.DARK_GRAY);
+        statusBarShape.setFillColor(GameConstants.STATUS_BAR_COLOR);
 
         add(statusBarShape);
 
@@ -160,25 +160,39 @@ public class BreakoutCanvas extends GCanvas {
         Font hudFont = new Font(
                 "SansSerif",
                 Font.BOLD,
-                14
+                GameConstants.HUD_FONT_SIZE
         );
 
         // Score label
-        scoreLabel = new GLabel("Score: 0", 20, 23);
+        scoreLabel = new GLabel(
+                "Score: 0",
+                GameConstants.HUD_SCORE_X,
+                GameConstants.HUD_BASELINE_Y
+        );
         scoreLabel.setFont(hudFont);
-        scoreLabel.setColor(Color.WHITE);
+        scoreLabel.setColor(GameConstants.HUD_TEXT_COLOR);
         add(scoreLabel);
 
         // Lives label
-        livesLabel = new GLabel("Lives: 3", 330, 23);
+        livesLabel = new GLabel(
+                "Lives: " + GameConstants.INITIAL_LIVES,
+                GameConstants.HUD_LIVES_X,
+                GameConstants.HUD_BASELINE_Y
+        );
         livesLabel.setFont(hudFont);
-        livesLabel.setColor(Color.WHITE);
+        livesLabel.setColor(GameConstants.HUD_TEXT_COLOR);
         add(livesLabel);
 
         // High score label
-        highScoreLabel = new GLabel("High Score: 0", 580, 23);
+        highScoreLabel = new GLabel(
+                "High Score: 0",
+                GameConstants.HUD_HIGH_SCORE_X,
+                GameConstants.HUD_BASELINE_Y
+        );
+
         highScoreLabel.setFont(hudFont);
-        highScoreLabel.setColor(Color.WHITE);
+        highScoreLabel.setColor(GameConstants.HUD_TEXT_COLOR);
+
         add(highScoreLabel);
     }
 
@@ -199,10 +213,14 @@ public class BreakoutCanvas extends GCanvas {
         messageLabel = new GLabel(message);
 
         messageLabel.setFont(
-                new Font("SansSerif", Font.BOLD, 28)
+                new Font(
+                        "SansSerif",
+                        Font.BOLD,
+                        GameConstants.MESSAGE_FONT_SIZE
+                )
         );
 
-        messageLabel.setColor(Color.BLACK);
+        messageLabel.setColor(GameConstants.MESSAGE_TEXT_COLOR);
 
         double x = (GameConstants.WINDOW_WIDTH
                 - messageLabel.getWidth()) / 2.0;

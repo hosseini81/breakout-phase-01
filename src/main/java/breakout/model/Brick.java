@@ -5,8 +5,8 @@ import breakout.config.GameConstants;
 public class Brick {
 
     // Position of the brick
-    private int x;
-    private int y;
+    private final int x;
+    private final int y;
 
     // Destruction state
     private boolean destroyed;

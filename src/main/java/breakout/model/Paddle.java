@@ -10,10 +10,13 @@ public class Paddle {
 
     // Constructor
     public Paddle() {
-        this.x = (GameConstants.WINDOW_WIDTH
-                - GameConstants.PADDLE_WIDTH) / 2;
-
+        this.x = getInitialX();
         this.y = GameConstants.PADDLE_Y;
+    }
+
+    private int getInitialX() {
+        return (GameConstants.WINDOW_WIDTH
+                - GameConstants.PADDLE_WIDTH) / 2;
     }
 
     // Move paddle to the left
@@ -30,8 +33,7 @@ public class Paddle {
     }
 
     public void reset() {
-        x = (GameConstants.WINDOW_WIDTH
-                - GameConstants.PADDLE_WIDTH) / 2;
+        x = getInitialX();
     }
 
     // Getters

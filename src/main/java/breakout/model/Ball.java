@@ -97,7 +97,9 @@ public class Ball {
 
         offset = Math.max(-1.0, Math.min(1.0, offset));
 
-        double angle = offset * Math.toRadians(60.0);
+        double angle = offset * Math.toRadians(
+                GameConstants.MAX_PADDLE_BOUNCE_ANGLE_DEGREES
+        );
 
         double speed = Math.hypot(vx, vy);
 
